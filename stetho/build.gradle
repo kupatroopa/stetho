@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         consumerProguardFiles 'proguard-consumer.pro'
@@ -30,11 +30,15 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:1.6.6'
 }
 
-apply from: rootProject.file('release.gradle')
+//apply from: rootProject.file('release.gradle')
 
 android.libraryVariants.all { variant ->
     def name = variant.name.capitalize()
 
+    task "jar${name}"(type: Jar, dependsOn: variant.javaCompile) {
+        from variant.javaCompile.destinationDir
+        
+        }
     // Ugly kludge to rename license files in the bundled commons-cli
     // dependency so that they do not appear to describe Stetho's license.
     task "tidyCommonsCli${name}"(type: Copy) {

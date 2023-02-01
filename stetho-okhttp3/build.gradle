@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -39,4 +39,4 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:mockwebserver:3.4.2'
 }
 
-apply from: rootProject.file('release.gradle')
+//apply from: rootProject.file('release.gradle')

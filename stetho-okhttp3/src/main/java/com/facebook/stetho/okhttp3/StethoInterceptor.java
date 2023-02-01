@@ -28,7 +28,7 @@ import java.io.OutputStream;
  * use:
  * <pre>
  *   OkHttpClient client = new OkHttpClient.Builder()
- *       .addNetworkInterceptor(new StethoInterceptor())
+ *       .addInterceptor(new StethoInterceptor())
  *       .build();
  * </pre>
  */
@@ -56,7 +56,16 @@ public class StethoInterceptor implements Interceptor {
       if (mEventReporter.isEnabled()) {
         mEventReporter.httpExchangeFailed(requestId, e.toString());
       }
-      throw e;
+  
+    response = new Response.Builder()
+            .message("ERR_FETCH_FAIL")
+            .request(request)
+            .protocol(Protocol.HTTP_1_1)
+            .code(408)
+            .body(ResponseBody.create(null, e.toString()))
+            .build();
+  
+
     }
 
     if (mEventReporter.isEnabled()) {
@@ -64,12 +73,16 @@ public class StethoInterceptor implements Interceptor {
         requestBodyHelper.reportDataSent();
       }
 
+      /* Inorder for request timeouts to show, 
+      chnaging it to use application interceptor 
+      where connection will be null
+      */
       Connection connection = chain.connection();
-      if (connection == null) {
-        throw new IllegalStateException(
-            "No connection associated with this request; " +
-                "did you use addInterceptor instead of addNetworkInterceptor?");
-      }
+//      if (connection == null) {
+//        throw new IllegalStateException(
+//            "No connection associated with this request; " +
+//                "did you use addInterceptor instead of addNetworkInterceptor?");
+//      }
       mEventReporter.responseHeadersReceived(
           new OkHttpInspectorResponse(
               requestId,

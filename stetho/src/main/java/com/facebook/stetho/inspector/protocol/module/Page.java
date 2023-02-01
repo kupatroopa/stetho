@@ -46,8 +46,7 @@ public class Page implements ChromeDevtoolsDomain {
   private final Context mContext;
   private final String mMessage;
   private final ObjectMapper mObjectMapper = new ObjectMapper();
-  @Nullable
-  private ScreencastDispatcher mScreencastDispatcher;
+
 
   public Page(Context context) {
     this(context, BANNER);
@@ -87,39 +86,7 @@ public class Page implements ChromeDevtoolsDomain {
     peer.invokeMethod("Console.messageAdded", messageAddedRequest, null /* callback */);
   }
 
-  // Dog science...
-  @ChromeDevtoolsMethod
-  public JsonRpcResult getResourceTree(JsonRpcPeer peer, JSONObject params) {
-    // The DOMStorage module expects one key/value store per "security origin" which has a 1:1
-    // relationship with resource tree frames.
-    List<String> prefsTags = SharedPreferencesHelper.getSharedPreferenceTags(mContext);
-    Iterator<String> prefsTagsIter = prefsTags.iterator();
 
-    FrameResourceTree tree = createSimpleFrameResourceTree(
-        "1",
-        null /* parentId */,
-        "Stetho",
-        prefsTagsIter.hasNext() ? prefsTagsIter.next() : "");
-    if (tree.childFrames == null) {
-      tree.childFrames = new ArrayList<FrameResourceTree>();
-    }
-
-    int nextChildFrameId = 1;
-    while (prefsTagsIter.hasNext()) {
-      String frameId = "1." + (nextChildFrameId++);
-      String prefsTag = prefsTagsIter.next();
-      FrameResourceTree child = createSimpleFrameResourceTree(
-          frameId,
-          "1",
-          "Child #" + frameId,
-          prefsTag);
-      tree.childFrames.add(child);
-    }
-
-    GetResourceTreeParams resultParams = new GetResourceTreeParams();
-    resultParams.frameTree = tree;
-    return resultParams;
-  }
 
   private static FrameResourceTree createSimpleFrameResourceTree(
       String id,
@@ -159,23 +126,9 @@ public class Page implements ChromeDevtoolsDomain {
   public void clearDeviceOrientationOverride(JsonRpcPeer peer, JSONObject params) {
   }
 
-  @ChromeDevtoolsMethod
-  public void startScreencast(final JsonRpcPeer peer, JSONObject params) {
-    final StartScreencastRequest request = mObjectMapper.convertValue(
-        params, StartScreencastRequest.class);
-    if (mScreencastDispatcher == null) {
-      mScreencastDispatcher = new ScreencastDispatcher();
-      mScreencastDispatcher.startScreencast(peer, request);
-    }
-  }
 
-  @ChromeDevtoolsMethod
-  public void stopScreencast(JsonRpcPeer peer, JSONObject params) {
-    if (mScreencastDispatcher != null) {
-      mScreencastDispatcher.stopScreencast();
-      mScreencastDispatcher = null;
-    }
-  }
+
+
 
   @ChromeDevtoolsMethod
   public void screencastFrameAck(JsonRpcPeer peer, JSONObject params) {
@@ -195,9 +148,7 @@ public class Page implements ChromeDevtoolsDomain {
   public void setEmulatedMedia(JsonRpcPeer peer, JSONObject params) {
   }
 
-  @ChromeDevtoolsMethod
-  public void setShowViewportSizeOnResize(JsonRpcPeer peer, JSONObject params) {
-  }
+
 
   private static class GetResourceTreeParams implements JsonRpcResult {
     @JsonProperty(required = true)

@@ -117,15 +117,8 @@ public class ChromeDiscoveryHandler implements HttpHandler {
       page.put("description", "");
 
       page.put("webSocketDebuggerUrl", "ws://" + mInspectorPath);
-      Uri chromeFrontendUrl = new Uri.Builder()
-          .scheme("http")
-          .authority("chrome-devtools-frontend.appspot.com")
-          .appendEncodedPath("serve_rev")
-          .appendEncodedPath(WEBKIT_REV)
-          .appendEncodedPath("devtools.html")
-          .appendQueryParameter("ws", mInspectorPath)
-          .build();
-      page.put("devtoolsFrontendUrl", chromeFrontendUrl.toString());
+      
+      page.put("devtoolsFrontendUrl", "");
 
       reply.put(page);
       mPageListResponse = LightHttpBody.create(reply.toString(), "application/json");
